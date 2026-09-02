@@ -1169,6 +1169,22 @@ class GuiFolderMessage(_CreateGuiComponentMessage):
 
 
 @dataclasses.dataclass
+class GuiPanelProps:
+    order: float
+    """Order value for arranging GUI elements."""
+    anchor: str
+    """Screen corner to anchor to. Currently only "top-left"."""
+    visible: bool
+    """Visibility of the panel."""
+
+
+@dataclasses.dataclass
+class GuiPanelMessage(_CreateGuiComponentMessage):
+    container_uuid: str
+    props: GuiPanelProps
+
+
+@dataclasses.dataclass
 class GuiMarkdownProps:
     order: float
     """Order value for arranging GUI elements. """

@@ -51,6 +51,7 @@ from ._gui_handles import (
     GuiModalHandle,
     GuiMultiSliderHandle,
     GuiNumberHandle,
+    GuiPanelHandle,
     GuiPlotlyHandle,
     GuiProgressBarHandle,
     GuiRgbaHandle,
@@ -542,6 +543,50 @@ class GuiApi:
         return GuiFolderHandle(
             _GuiHandleState(
                 folder_container_id,
+                self,
+                None,
+                props=props,
+                parent_container_id=self._get_container_uuid(),
+            )
+        )
+
+    def add_panel(
+        self,
+        anchor: Literal["top-left"] = "top-left",
+        *,
+        order: float | None = None,
+        visible: bool = True,
+    ) -> GuiPanelHandle:
+        """Add an anchored panel, and return a handle that can be used to populate it.
+
+        Unlike folders, panels are rendered by the client as a separate,
+        screen-anchored container rather than inline in the main GUI panel.
+
+        Args:
+            anchor: Screen corner to anchor the panel to. Currently only "top-left".
+            order: Optional ordering, smallest values will be displayed first.
+            visible: Whether the component is visible.
+
+        Returns:
+            A handle that can be used as a context to populate the panel.
+        """
+        panel_container_id = _make_uuid()
+        order = _apply_default_order(order)
+        props = _messages.GuiPanelProps(
+            order=order,
+            anchor=anchor,
+            visible=visible,
+        )
+        self._websock_interface.queue_message(
+            _messages.GuiPanelMessage(
+                uuid=panel_container_id,
+                container_uuid=self._get_container_uuid(),
+                props=props,
+            )
+        )
+        return GuiPanelHandle(
+            _GuiHandleState(
+                panel_container_id,
                 self,
                 None,
                 props=props,

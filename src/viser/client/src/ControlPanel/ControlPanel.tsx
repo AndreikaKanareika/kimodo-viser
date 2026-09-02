@@ -38,11 +38,25 @@ import BottomPanel from "./BottomPanel";
 import FloatingPanel from "./FloatingPanel";
 import { ThemeConfigurationMessage } from "../WebsocketMessages";
 import SidebarPanel from "./SidebarPanel";
+import AnchoredPanel from "./AnchoredPanel";
 
 // Must match constant in Python.
 const ROOT_CONTAINER_ID = "root";
 
 const MemoizedGeneratedGuiContainer = React.memo(GeneratedGuiContainer);
+
+/** Shallow equality for arrays of `{uuid, order}`, used to avoid re-renders
+ * when the set of quick panels (and their relative order) hasn't changed. */
+function panelUuidOrderPairsEqual(
+  a: { uuid: string; order: number }[],
+  b: { uuid: string; order: number }[],
+) {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    if (a[i].uuid !== b[i].uuid || a[i].order !== b[i].order) return false;
+  }
+  return true;
+}
 
 export default function ControlPanel(props: {
   control_layout: ThemeConfigurationMessage["control_layout"];
@@ -57,6 +71,24 @@ export default function ControlPanel(props: {
       Object.keys(state.guiUuidSetFromContainerUuid["root"] ?? {}).length > 0,
   );
   const [showSettings, { toggle }] = useDisclosure(false);
+
+  // Quick panels: GUI elements at the root container whose message type is
+  // `GuiPanelMessage`. These are excluded from the normal generated GUI
+  // render (see the `GuiPanelMessage` case in `Generated.tsx`) and instead
+  // rendered as separate `AnchoredPanel`s. When no panels exist (the common,
+  // stock-viser case), this is an empty array and nothing new is rendered.
+  const panels = viewer.useGui((state) => {
+    const rootUuids = state.guiUuidSetFromContainerUuid[ROOT_CONTAINER_ID];
+    const out: { uuid: string; order: number }[] = [];
+    for (const uuid of Object.keys(rootUuids ?? {})) {
+      const conf = state.guiConfigFromUuid[uuid];
+      if (conf?.type === "GuiPanelMessage") {
+        out.push({ uuid: uuid, order: conf.props.order });
+      }
+    }
+    out.sort((a, b) => a.order - b.order);
+    return out;
+  }, panelUuidOrderPairsEqual);
 
   const controlWidthString = viewer.useGui(
     (state) => state.theme.control_width,
@@ -112,9 +144,10 @@ export default function ControlPanel(props: {
     </>
   );
 
+  let mainPanel: React.ReactNode;
   if (useMobileView) {
     /* Mobile layout. */
-    return (
+    mainPanel = (
       <BottomPanel>
         <BottomPanel.Handle>
           <ConnectionStatus />
@@ -128,7 +161,7 @@ export default function ControlPanel(props: {
     );
   } else if (props.control_layout === "floating") {
     /* Floating layout. */
-    return (
+    mainPanel = (
       <FloatingPanel width={controlWidth}>
         <FloatingPanel.Handle>
           <ConnectionStatus />
@@ -142,7 +175,7 @@ export default function ControlPanel(props: {
     );
   } else {
     /* Sidebar view. */
-    return (
+    mainPanel = (
       <SidebarPanel
         width={controlWidth}
         collapsible={props.control_layout === "collapsible"}
@@ -156,6 +189,19 @@ export default function ControlPanel(props: {
       </SidebarPanel>
     );
   }
+
+  // With zero panels (the stock-viser case), this renders exactly
+  // `mainPanel` with no extra DOM nodes: the surrounding fragment and the
+  // `false` from the guard both produce no output.
+  return (
+    <>
+      {mainPanel}
+      {panels.length > 0 &&
+        panels.map(({ uuid }) => (
+          <AnchoredPanel key={uuid} panelUuid={uuid} />
+        ))}
+    </>
+  );
 }
 
 /* Icon and label telling us the current status of the websocket connection. */

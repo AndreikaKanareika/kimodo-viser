@@ -264,6 +264,16 @@ export interface GuiFolderMessage {
   container_uuid: string;
   props: {'order': number, 'label': string, 'visible': boolean, 'expand_by_default': boolean};
 }
+/** GuiPanelMessage(uuid: 'str', container_uuid: 'str', props: 'GuiPanelProps')
+ *
+ * (automatically generated)
+ */
+export interface GuiPanelMessage {
+  type: "GuiPanelMessage";
+  uuid: string;
+  container_uuid: string;
+  props: {'order': number, 'anchor': string, 'visible': boolean};
+}
 /** GuiMarkdownMessage(uuid: 'str', container_uuid: 'str', props: 'GuiMarkdownProps')
  *
  * (automatically generated)
@@ -1153,6 +1163,7 @@ export type Message =
   | GaussianSplatsMessage
   | RemoveSceneNodeMessage
   | GuiFolderMessage
+  | GuiPanelMessage
   | GuiMarkdownMessage
   | GuiHtmlMessage
   | GuiProgressBarMessage
@@ -1265,6 +1276,7 @@ export type SceneNodeMessage =
   | GaussianSplatsMessage;
 export type GuiComponentMessage = 
   | GuiFolderMessage
+  | GuiPanelMessage
   | GuiMarkdownMessage
   | GuiHtmlMessage
   | GuiProgressBarMessage
@@ -1288,6 +1300,6 @@ export type GuiComponentMessage =
 const typeSetSceneNodeMessage = new Set(['CameraFrustumMessage', 'GlbMessage', 'FrameMessage', 'BatchedAxesMessage', 'GridMessage', 'LabelMessage', 'Gui3DMessage', 'PointCloudMessage', 'DirectionalLightMessage', 'AmbientLightMessage', 'HemisphereLightMessage', 'PointLightMessage', 'RectAreaLightMessage', 'SpotLightMessage', 'MeshMessage', 'BoxMessage', 'IcosphereMessage', 'SkinnedMeshMessage', 'BatchedMeshesMessage', 'BatchedGlbMessage', 'TransformControlsMessage', 'ImageMessage', 'LineSegmentsMessage', 'CatmullRomSplineMessage', 'CubicBezierSplineMessage', 'GaussianSplatsMessage']);export function isSceneNodeMessage(message: Message): message is SceneNodeMessage {
     return typeSetSceneNodeMessage.has(message.type);
 }
-const typeSetGuiComponentMessage = new Set(['GuiFolderMessage', 'GuiMarkdownMessage', 'GuiHtmlMessage', 'GuiProgressBarMessage', 'GuiPlotlyMessage', 'GuiUplotMessage', 'GuiImageMessage', 'GuiTabGroupMessage', 'GuiButtonMessage', 'GuiUploadButtonMessage', 'GuiSliderMessage', 'GuiMultiSliderMessage', 'GuiNumberMessage', 'GuiRgbMessage', 'GuiRgbaMessage', 'GuiCheckboxMessage', 'GuiVector2Message', 'GuiVector3Message', 'GuiTextMessage', 'GuiDropdownMessage', 'GuiButtonGroupMessage']);export function isGuiComponentMessage(message: Message): message is GuiComponentMessage {
+const typeSetGuiComponentMessage = new Set(['GuiFolderMessage', 'GuiPanelMessage', 'GuiMarkdownMessage', 'GuiHtmlMessage', 'GuiProgressBarMessage', 'GuiPlotlyMessage', 'GuiUplotMessage', 'GuiImageMessage', 'GuiTabGroupMessage', 'GuiButtonMessage', 'GuiUploadButtonMessage', 'GuiSliderMessage', 'GuiMultiSliderMessage', 'GuiNumberMessage', 'GuiRgbMessage', 'GuiRgbaMessage', 'GuiCheckboxMessage', 'GuiVector2Message', 'GuiVector3Message', 'GuiTextMessage', 'GuiDropdownMessage', 'GuiButtonGroupMessage']);export function isGuiComponentMessage(message: Message): message is GuiComponentMessage {
     return typeSetGuiComponentMessage.has(message.type);
 }

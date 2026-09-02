@@ -121,6 +121,10 @@ function GeneratedInput(props: {
   switch (conf.type) {
     case "GuiFolderMessage":
       return <FolderComponent {...conf} nextGuiUuid={props.nextGuiUuid} />;
+    case "GuiPanelMessage":
+      // Quick panels are rendered separately as `AnchoredPanel`s (see
+      // ControlPanel.tsx), not inline in the normal GUI flow.
+      return null;
     case "GuiTabGroupMessage":
       return <TabGroupComponent {...conf} />;
     case "GuiMarkdownMessage":
